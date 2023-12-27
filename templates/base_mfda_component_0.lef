@@ -1,0 +1,23 @@
+
+ 
+MACRO %NAME%
+  CLASS CORE ;
+  ORIGIN  %ORG_1X% %ORG_1Y% ;
+  FOREIGN serpentine_50px_0 0 0 ;
+  SIZE %BOUND_X% BY %BOUND_Y% ;
+  SYMMETRY X Y ;
+  SITE CoreSite ;
+  PIN %PIN_#%
+    DIRECTION %PIN_#.DIR% ;
+    USE SIGNAL ;
+    PORT
+      LAYER %PIN_#.LAYER% ;
+        RECT %PIN_#.X1% %PIN_#.Y1% %PIN_#.X2% %PIN_#.Y2% ;
+    END
+  END %PIN_#%
+  OBS
+    LAYER %OBS.LAYER% ;
+      RECT %OBS.X1% %OBS.Y1% %OBS.X2% %OBS.Y2% ;
+  END
+  PROPERTY CatenaDesignType "deviceLevel" ;
+END %NAME%

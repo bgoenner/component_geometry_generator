@@ -1,4 +1,6 @@
 
+import regex
+
 
 class ComponentGenerator:
 
@@ -17,3 +19,22 @@ class ComponentGenerator:
 
     def convert_px_2_boundary(self, num_px, num_layers):
         pass
+
+    def parse_lef_template(self, template_file):
+
+        # regex for template %(.*?)%
+        # matches .*%PIN_#%(?=.*\n)[^}]+%PIN_#%
+        # matches .*%PIN_#\[%(?=.*\n)[^}]+%PIN_#\]%
+
+        # parse template
+        with open(template_file, 'r+') as f:
+            data = mmap.mmap(f.fileno(), 0)
+            mo = regex.finditer(module_re, data)
+
+        if mo:
+            newFile.write('\n'.join([ x.group().decode('utf-8') for x in mo ]))
+            print("found module", mo)#.decode('utf-8'))
+
+
+if __name__ == "__main__":
+    pass
