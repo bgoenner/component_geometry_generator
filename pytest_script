@@ -1,0 +1,1 @@
+PYTHONPATH=. pytest -rP tests/test_lef_generator.py > test_output

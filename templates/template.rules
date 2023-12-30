@@ -1,0 +1,18 @@
+
+Template variable
+  %variable_name%
+
+Template variable_list
+  %varibale_name_#%
+
+  The variable in code will be enumerated by a number or string
+
+Template variable block
+  %variable_name[% - start
+  %variable_name]% - end 
+
+  %variable_name[+% - include start of current line
+  %variable_name]+% - include end of current line
+
+Template variable explicit varable
+  %variable_name.child_value% - similar to python dicionaries

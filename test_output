@@ -1,0 +1,64 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.6, pytest-7.4.3, pluggy-1.3.0
+rootdir: /home/bg/Software/MFDA/component_geometry_generator
+plugins: anyio-3.7.1
+collected 5 items
+
+tests/test_lef_generator.py .....                                        [100%]
+
+==================================== PASSES ====================================
+______________________________ test_load_template ______________________________
+----------------------------- Captured stdout call -----------------------------
+['%Name%', '%Org_1X%', '%Org_1Y%', '%Name%', '%Bounds.x%', '%Bounds.y%', '%Pin_#[%', '%Pin_#.Dir%', '%Pin_#.Layer%', '%Pin_#.X1%', '%Pin_#.Y1%', '%Pin_#.X2%', '%Pin_#.Y2%', '%Pin_#]%', '%OBS.Layer%', '%OBS.X1%', '%OBS.Y1%', '%OBS.X2%', '%OBS.Y2%', '%Name%']
+_____________________________ test_parse_template ______________________________
+----------------------------- Captured stdout call -----------------------------
+{'values': ['Name', 'Org_1X', 'Org_1Y', 'Pin_#'], 'list': ['Pin_#'], 'dictionaries': {'Bounds': ['x', 'y'], 'Pin_#': ['Dir', 'Layer', 'X1', 'Y1', 'X2', 'Y2'], 'OBS': ['Layer', 'X1', 'Y1', 'X2', 'Y2']}, 'blocks': {'Pin_#': ['  PIN %Pin_#[%\n    DIRECTION %Pin_#.Dir% ;\n    USE SIGNAL ;\n    PORT\n      LAYER %Pin_#.Layer% ;\n        RECT %Pin_#.X1% %Pin_#.Y1% %Pin_#.X2% %Pin_#.Y2% ;\n    END\n  END %Pin_#]%']}}
+____________________________ test_extract_scad_lef _____________________________
+----------------------------- Captured stdout call -----------------------------
+module LEF(){
+
+Name = "serpentine_50px_0;
+
+Org_1X = 0;
+Org_1Y = 0;
+
+Pin_1 = [
+    "fl_in",
+    ["Dir", "1"],
+    ["Layer", "met1"],
+    ["X1", "29.5"],
+    ["X2", "30.5"],
+    ["Y1", "29.5"],
+    ["Y1", "30.5"],
+];
+Pin_2 = [
+    "fl_out",
+    ["Dir", "1"],
+    ["Layer", "met1"],
+    ["X1", "29.5"],
+    ["X2", "30.5"],
+    ["Y1", "29.5"],
+    ["Y1", "30.5"],
+];
+
+Bounds = [
+    ["x", 300],
+    ["y", 300]
+];
+
+OBS = [
+    ["Layer", "met1"],
+    ["X1", "met1"],
+    ["X2", "met1"],
+    ["Y1", "met1"],
+    ["Y2", "met1"],
+]
+
+}
+_____________________________ test_parse_lef_block _____________________________
+----------------------------- Captured stdout call -----------------------------
+{'Name ': '"serpentine_50px_0', 'Org_1X ': '0', 'Org_1Y ': '0', 'Pin_1 ': {'': 'fl_in', 'Dir': '1', 'Layer': 'met1', 'X1': '29.5', 'X2': '30.5', 'Y1': '30.5'}, 'Pin_2 ': {'': 'fl_out', 'Dir': '1', 'Layer': 'met1', 'X1': '29.5', 'X2': '30.5', 'Y1': '30.5'}, 'Bounds ': {'x': '300', 'y': '300'}}
+_______________________________ test_build_prep ________________________________
+----------------------------- Captured stdout call -----------------------------
+{'Pin_#': 2}
+============================== 5 passed in 17.70s ==============================
