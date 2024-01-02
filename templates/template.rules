@@ -14,5 +14,8 @@ Template variable block
   %variable_name[+% - include start of current line
   %variable_name]+% - include end of current line
 
+  %variable_name[-% - exclude varable from block
+  %variable_name]-% - exclude varable from block
+
 Template variable explicit varable
   %variable_name.child_value% - similar to python dicionaries

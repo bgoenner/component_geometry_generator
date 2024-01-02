@@ -210,7 +210,7 @@ class ComponentGenerator:
             variables = [ x.group().decode('utf-8') for x in mo ]
 
         for v in variables:
-            var_name = v.split('=')[0]
+            var_name = v.split('=')[0].lstrip().rstrip()
             var_val  = v.split('=')[1].replace(';','').replace('\n','')
 
             p = regex.compile(r'(\[\s*"[\w ]*"\s*),([\w." ]*\])')
@@ -255,6 +255,9 @@ class ComponentGenerator:
         
         # get block keys
         #bl = self.template['blocks'].keys()
+        print('Scad build scad_lef:')
+        print(self.scad_lef)
+
         s = self.scad_lef.keys()
         block_count = {}
 
@@ -264,6 +267,154 @@ class ComponentGenerator:
             #block_count[k] = [k.replace('#', '') in self.scad_lef.keys()].count(True)
 
         print(block_count)
+
+        temp_f = open(template_file, 'r+')
+        o_file = open('/'.join(src_scad.split('/')[:-1])+'/comp_out.lef', 'w' )
+
+        block_local = {}
+        block_track = {}
+
+        def write_blocks(layer=0):
+
+            # iterate through
+
+            l_key = list(block_local.keys())[layer]
+
+            print(block_local[l_key])
+
+            for scad_bl in [s for s in self.scad_lef if l_key.replace('#','') in s]:
+            #self.scad_lef
+                scad_bl_dict = self.scad_lef[scad_bl]
+                print(scad_bl_dict)
+
+                # go through each block line
+                for bl in block_local[l_key].split('\n')[:-1]: # \n ends all squences
+                    bl += '\n'
+                    mod_re = r'%[\w\[\]#.]*%'
+                    mo_bl = regex.finditer(mod_re, bl)
+                    # go through each key
+                    for mo_bl_item in [ x.group() for x in mo_bl ]:
+                        mo_bl_item_cl = mo_bl_item \
+                            .replace(l_key, scad_bl) \
+                            .replace('%','') \
+                            .replace('[','') \
+                            .replace(']','')
+                        print(mo_bl_item)
+                        if '.' in mo_bl_item:
+                            mo_key1 = mo_bl_item_cl.split('.')[0]
+                            mo_key2 = mo_bl_item_cl.split('.')[1]
+                            val = scad_bl_dict[mo_key2]
+                        else:
+                            val = scad_bl_dict['']
+                        # replace key with val
+                        bl = bl.replace(mo_bl_item, val)
+
+                    o_file.write(bl)
+
+
+            # get scad_lefs with matching key
+
+        def open_block(mo_item_ob):
+            # block begin
+            block_key = mo_item_ob.split('[')[0].replace('%','')
+            if block_key not in block_track or \
+                not block_track[block_key]: # = False
+                block_track[block_key] = True
+                block_local[block_key] = ''
+            else:
+                raise ValueError("Issue with block "+block_key)
+            if '[+' in mo_item_ob:
+                block_local[block_key] += l
+            elif '[-' in mo_item_ob:
+                block_local[block_key] += l.replace(mo_item_ob,'')
+            else:
+                #TODO start at identifier
+                block_local[block_key] += l
+        
+        def close_block(mo_item_cb):
+            # close block
+            block_key = mo_item_cb.split(']')[0].replace('%', '')
+            block_track[block_key] = False
+            # add line
+            if ']+' in mo_item_cb:
+                block_local[block_key] += l
+            elif ']-' in mo_item_cb:
+                block_local[block_key] += l.replace(mo_item_cb,'')
+            else:
+                #TODO start at identifier
+                block_local[block_key] += l
+            
+                if not any(block_track.values()):
+                    write_blocks()
+            
+
+
+        
+
+        for l in temp_f:
+            print(block_track)
+
+            if any(block_track.values()):
+                for bk, bv in block_track.items():
+                    if bv:
+                        if ']' not in l:
+                            block_local[bk] += l
+
+                        mod_re = r'%[\w\[\]#.]*%'
+                        mo = regex.finditer(mod_re, l)
+
+                        for mo_item in [ x.group() for x in mo ]:
+                            mo_i_cl = mo_item.replace('%', '')
+                            if '[' in mo_item:
+                                # block begin
+                                open_block(mo_item)
+                            if ']' in mo_item:
+                                close_block(mo_item)
+                continue
+
+
+            if '%' in l:
+                # %[\w\[\]#.]*%
+                mod_re = r'%[\w\[\]#.]*%'
+                mo = regex.finditer(mod_re, l)
+                #if any(block_track.values()):
+                #    for bk, bv in block_track.items():
+                #        if bv:
+                #            block_local[bk] += l
+                #            for mo_item in [ x.group() for x in mo ]:
+                #                mo_i_cl = mo_item.replace('%', '')
+                #                if '[' in mo_item:
+                #                    # block begin
+                #                    open_block(mo_item)
+                #                if ']' in mo_item:
+                #                    close_block(mo_item)
+                
+                for mo_item in [ x.group() for x in mo ]:
+                    mo_i_cl = mo_item.replace('%', '')
+                    if '[' in mo_item:
+                        open_block(mo_item)
+
+                    if ']' in mo_item:
+                        # block end
+                        continue
+                    if any(block_track.values()):
+                        continue
+                    # if not inside a block
+                    else:
+                        if '.' in mo_i_cl:
+                            mo_key1 = mo_i_cl.split('.')[0]
+                            mo_key2 = mo_i_cl.split('.')[1]
+                            val = self.scad_lef[mo_key1][mo_key2]
+                        else:
+                            val = self.scad_lef[mo_i_cl]
+
+                        print(mo_item+' -> '+val)
+                        l = l.replace(mo_item, val)
+                if not any(block_track.values()):
+                    o_file.write(l)
+            else:
+                if not any(block_track.values()):
+                    o_file.write(l)
 
 if __name__ == "__main__":
     pass

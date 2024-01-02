@@ -57,7 +57,7 @@ def test_parse_lef_block():
 
     print(test_gen.scad_lef)
 
-def test_build_prep():
+def test_build():
 
     # variables
     mscad_file = './tests/full_geom/test_full_serpentine_50px_0.mscad'
